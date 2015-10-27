@@ -6,6 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -17,6 +22,23 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        //creating an array of fake data
+        String [] forecastArray = {
+                "Today - sunny - 88/63",
+                "Tomorrow - Foggy - 70/40",
+                "Weds - cloudy - 72/63",
+                "Thur - Asteroids - 75/65",
+                "Sat - HELPTAPPED IN WEATHERSTATION -60/51",
+                "Sun - Sunny - 80/68"
+        };
+
+        //Converting the array to an ArrayList
+        List<String> weekForecast = new ArrayList<>(
+                Arrays.asList(forecastArray)
+        );
+
+        return rootView;
     }
 }
