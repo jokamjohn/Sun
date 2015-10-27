@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -38,6 +40,22 @@ public class MainActivityFragment extends Fragment {
         List<String> weekForecast = new ArrayList<>(
                 Arrays.asList(forecastArray)
         );
+
+        //Array adapter to populate the list data
+        ArrayAdapter<String> mForecastAdapter = new ArrayAdapter<>(
+                //The current context
+                getActivity(),
+                //ID of list item layout
+                R.layout.list_item_forecast,
+                //ID of list textview to populate
+                R.id.list_item_forecast_textview,
+                //List of data
+                weekForecast);
+
+        //List view to populate the data
+        ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        //Binding the adapter to the view
+        forecastListView.setAdapter(mForecastAdapter);
 
         return rootView;
     }
