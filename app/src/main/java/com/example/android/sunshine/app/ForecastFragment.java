@@ -3,6 +3,7 @@ package com.example.android.sunshine.app;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -82,6 +84,15 @@ public class ForecastFragment extends Fragment {
         ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
         //Binding the adapter to the view
         forecastListView.setAdapter(mForecastAdapter);
+        //Adding a click listener to the list view
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String forecast = mForecastAdapter.getItem(position);
+                Snackbar.make(view,forecast,Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        });
 
         return rootView;
     }
