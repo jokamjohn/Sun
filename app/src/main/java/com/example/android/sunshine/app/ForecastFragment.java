@@ -1,9 +1,11 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -114,7 +116,13 @@ public class ForecastFragment extends Fragment {
         if (id == R.id.action_refresh)
         {
             FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("kampala");
+
+            //Using shared prefernces to set the location from settings
+            SharedPreferences preferences = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+            String location = preferences.getString(getString(R.string.pref_location_key),
+                    getString(R.string.pref_location_default_value));
+            weatherTask.execute(location);
             return true;
         }
 
