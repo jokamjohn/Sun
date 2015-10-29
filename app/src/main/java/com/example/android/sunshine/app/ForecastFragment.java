@@ -31,8 +31,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A Forecast fragment containing the weather data.
@@ -56,21 +54,6 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        //creating an array of fake data
-        String [] forecastArray = {
-                "Today - sunny - 88/63",
-                "Tomorrow - Foggy - 70/40",
-                "Weds - cloudy - 72/63",
-                "Thur - Asteroids - 75/65",
-                "Sat - HELPTAPPED IN WEATHERSTATION -60/51",
-                "Sun - Sunny - 80/68"
-        };
-
-        //Converting the array to an ArrayList
-        List<String> weekForecast = new ArrayList<>(
-                Arrays.asList(forecastArray)
-        );
-
         //Array adapter to populate the list data
         mForecastAdapter = new ArrayAdapter<>(
                 //The current context
@@ -79,8 +62,8 @@ public class ForecastFragment extends Fragment {
                 R.layout.list_item_forecast,
                 //ID of list textview to populate
                 R.id.list_item_forecast_textview,
-                //List of data
-                weekForecast);
+                //Empty array list
+                new ArrayList<String>());
 
         //List view to populate the data
         ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -115,18 +98,30 @@ public class ForecastFragment extends Fragment {
 
         if (id == R.id.action_refresh)
         {
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-
-            //Using shared prefernces to set the location from settings
-            SharedPreferences preferences = PreferenceManager
-                    .getDefaultSharedPreferences(getActivity());
-            String location = preferences.getString(getString(R.string.pref_location_key),
-                    getString(R.string.pref_location_default_value));
-            weatherTask.execute(location);
+            updateWeather();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //Show live data when the app starts
+        updateWeather();
+    }
+
+    //Helper method to update the weather depending on the location
+    //setting
+    private void updateWeather() {
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        //Using shared preferences to set the location from settings
+        SharedPreferences preferences = PreferenceManager
+                .getDefaultSharedPreferences(getActivity());
+        String location = preferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default_value));
+        weatherTask.execute(location);
     }
 
     //Async task class
@@ -226,9 +221,6 @@ public class ForecastFragment extends Fragment {
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
-            }
             return resultStrs;
 
         }
