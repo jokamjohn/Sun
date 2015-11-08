@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,12 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
@@ -24,6 +27,7 @@ import com.example.android.sunshine.app.data.WeatherContract;
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private final String LOG_TAG = ForecastFragment.class.getSimpleName();
     //Forecast adapter
     private ForecastAdapter mForecastAdapter;
     private static final int FORECAST_LOADER = 0;
@@ -80,6 +84,29 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         //Binding the adapter to the view
         forecastListView.setAdapter(mForecastAdapter);
         //Adding a click listener to the list view
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null){
+                    String locationSetting = Utility.getPreferredLocation(getActivity());
+
+                    Intent detailIntent = new Intent(getActivity(),DetailActivity.class);
+
+                    Uri detailUri = WeatherContract.WeatherEntry
+                            .buildWeatherLocationWithDate(locationSetting,
+                                    cursor.getLong(COL_WEATHER_DATE));
+
+                    Log.i(LOG_TAG,"Detail uri: " + detailUri);
+
+                    detailIntent.setData(detailUri);
+                    startActivity(detailIntent);
+
+                }
+            }
+        });
 
         return rootView;
     }
@@ -138,6 +165,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
                 locationSetting,System.currentTimeMillis());
+        Log.i(LOG_TAG, "weather and date uri: " + weatherForLocationUri);
         return new CursorLoader(getActivity(),
                 weatherForLocationUri,
                 FORECAST_COLUMNS,
