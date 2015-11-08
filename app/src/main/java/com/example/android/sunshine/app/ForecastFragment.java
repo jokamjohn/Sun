@@ -90,16 +90,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 // CursorAdapter returns a cursor at the correct position for getItem(), or null
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) parent.getItemAtPosition(position);
-                if (cursor != null){
+                if (cursor != null) {
                     String locationSetting = Utility.getPreferredLocation(getActivity());
 
-                    Intent detailIntent = new Intent(getActivity(),DetailActivity.class);
+                    Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
 
                     Uri detailUri = WeatherContract.WeatherEntry
                             .buildWeatherLocationWithDate(locationSetting,
                                     cursor.getLong(COL_WEATHER_DATE));
 
-                    Log.i(LOG_TAG,"Detail uri: " + detailUri);
+                    Log.i(LOG_TAG, "Detail uri: " + detailUri);
 
                     detailIntent.setData(detailUri);
                     startActivity(detailIntent);
@@ -132,21 +132,21 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        //Show live data when the app starts
-        updateWeather();
-    }
-
     //Helper method to update the weather depending on the location
     //setting
     private void updateWeather() {
         FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
         //Using shared preferences to set the location from settings
-
         String locationSetting = Utility.getPreferredLocation(getActivity());
         weatherTask.execute(locationSetting);
+    }
+
+    //Check for location change
+    // since we read the location when we create the loader, all we need to do is restart things
+    public void onLocationChanged()
+    {
+        updateWeather();
+        getLoaderManager().restartLoader(FORECAST_LOADER,null,this);
     }
 
     @Override
@@ -159,6 +159,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
+        //We read the location when we create the loader
         String locationSetting = Utility.getPreferredLocation(getActivity());
         //Sort order
         String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";

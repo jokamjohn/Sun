@@ -14,13 +14,18 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    private String mLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //Current known location in the location setting
+        mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
     }
 
     @Override
@@ -49,6 +54,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //This occurs when we get back to the main activity after changing the  location setting
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(LOG_TAG,"OnResume now");
+
+        String currentLocation = Utility.getPreferredLocation(this);
+        if (currentLocation != null && !currentLocation.equals(mLocation))
+        {
+            ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.fragment);
+            if (null != forecastFragment)
+            {
+                //Get new data for the new location
+                forecastFragment.onLocationChanged();
+            }
+            mLocation = currentLocation;
+        }
     }
 
     private void showLocationOnMap() {
