@@ -26,10 +26,14 @@ import com.example.android.sunshine.app.data.WeatherContract;
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String SELECTED_POSITION = "selected position";
     private final String LOG_TAG = ForecastFragment.class.getSimpleName();
     //Forecast adapter
     private ForecastAdapter mForecastAdapter;
     private static final int FORECAST_LOADER = 0;
+    //track position of the clicked item
+    private int mPosition;
+    private ListView mForecastListView;
 
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
@@ -89,13 +93,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         //List view to populate the data
-        ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        mForecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
         mForecastAdapter = new ForecastAdapter(getActivity(),null,0);
         //Binding the adapter to the view
-        forecastListView.setAdapter(mForecastAdapter);
+        mForecastListView.setAdapter(mForecastAdapter);
 
         //Adding a click listener to the list view
-        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mForecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // CursorAdapter returns a cursor at the correct position for getItem(), or null
@@ -110,13 +114,45 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
                     Log.i(LOG_TAG, "Detail uri: " + detailUri);
                     //use the callback
-                    ((Callback)getActivity())
+                    ((Callback) getActivity())
                             .onItemSelected(detailUri);
                 }
+                //update the position
+                mPosition = position;
             }
         });
 
+        // If there's instance state, mind it for useful information.
+        // The end-goal here is that the user never knows that turning their device sideways
+        // does crazy lifecycle related things.  It should feel like some stuff stretched out,
+        // or magically appeared to take advantage of room, but data or place in the app was never
+        // actually *lost*.
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_POSITION) )
+        {
+            // The listview probably hasn't even been populated yet.  Actually perform the
+            // swapout in onLoadFinished.
+            mPosition = savedInstanceState.getByte(SELECTED_POSITION);
+        }
+
         return rootView;
+    }
+
+    /**
+     * Save the position of the clicked item in the list
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // When tablets rotate, the currently selected list item needs to be saved.
+        // When no item is selected, mPosition will be set to Listview.INVALID_POSITION,
+        // so check for that before storing.
+        if (mPosition != ListView.INVALID_POSITION)
+        {
+            outState.putInt(SELECTED_POSITION,mPosition);
+        }
+        super.onSaveInstanceState(outState);
+
     }
 
     //Inflating the forecast fragment menu to the fragment
@@ -186,6 +222,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
+
+        if (mPosition != ListView.INVALID_POSITION)
+        {
+            // If we don't need to restart the loader, and there's a desired position to restore
+            // to, do so now.
+            mForecastListView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
