@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAIL_FRAGMENT_TAG = "DFAG";
@@ -89,7 +89,16 @@ public class MainActivity extends AppCompatActivity {
                 //Get new data for the new location
                 forecastFragment.onLocationChanged();
             }
+            //update the mLocation
             mLocation = currentLocation;
+
+            //Update the detail fragment when the location changes
+            DetailActivityFragment detailFragment = (DetailActivityFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DETAIL_FRAGMENT_TAG);
+            if (null != detailFragment)
+            {
+                detailFragment.onLocationChanged(currentLocation);
+            }
         }
     }
 
@@ -111,6 +120,32 @@ public class MainActivity extends AppCompatActivity {
         else
         {
             Log.d(LOG_TAG, "Could not call " + location);
+        }
+    }
+
+    @Override
+    public void onItemSelected(Uri dateUri) {
+
+        if (mPaneUI)
+        {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putParcelable(DetailActivityFragment.DETAIL_URI,dateUri);
+
+            DetailActivityFragment fragment = new DetailActivityFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container,fragment,DETAIL_FRAGMENT_TAG)
+                    .commit();
+        }
+        else {
+            //Start the detail activity on the phone
+            Intent detailIntent = new Intent(this,DetailActivity.class);
+            detailIntent.setData(dateUri);
+            startActivity(detailIntent);
         }
     }
 }

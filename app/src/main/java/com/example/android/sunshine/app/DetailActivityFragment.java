@@ -38,6 +38,8 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
     private static final int DETAIL_LOADER = 0;
 
+    static final String DETAIL_URI = "URI";
+
     ShareActionProvider mshareActionProvider;
 
     private String mForecastStr;
@@ -82,10 +84,19 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     private TextView mWindView;
     private TextView mPressureView;
 
+    private Uri mUri;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        //get the arguments with which the fragment was initialised
+        Bundle arguments = getArguments();
+        if (arguments != null)
+        {
+            mUri = arguments.getParcelable(DetailActivityFragment.DETAIL_URI);
+        }
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
@@ -136,25 +147,39 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         return shareIntent;
     }
 
+    /**
+     * Replace the Uri since the data has changed
+     * @param newLocation
+     */
+    void onLocationChanged( String newLocation ) {
+        // replace the uri, since the location has changed
+        Uri uri = mUri;
+        if (null != uri) {
+            long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+            Uri updatedUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(newLocation, date);
+            mUri = updatedUri;
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+        }
+    }
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "in oncreate loader");
 
-        Intent detailIntent = getActivity().getIntent();
-        if (detailIntent == null || detailIntent.getData() == null) {
-            return null;
+        //create a cursor loader that will take care
+        //of cursor of data in the ui
+        if (null != mUri) {
+            return new CursorLoader(
+                    getActivity(),
+                    mUri,
+                    DETAIL_COLUMNS,
+                    null,
+                    null,
+                    null
+            );
         }
-        Uri detailUri = detailIntent.getData();
 
-        return new CursorLoader(
-                getActivity(),
-                detailUri,
-                DETAIL_COLUMNS,
-                null,
-                null,
-                null
-        );
+        return null;
     }
 
     @Override

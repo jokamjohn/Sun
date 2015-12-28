@@ -1,6 +1,5 @@
 package com.example.android.sunshine.app;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -65,6 +64,17 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public ForecastFragment() {
     }
 
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(Uri dateUri);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,17 +104,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 if (cursor != null) {
                     String locationSetting = Utility.getPreferredLocation(getActivity());
 
-                    Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
-
                     Uri detailUri = WeatherContract.WeatherEntry
                             .buildWeatherLocationWithDate(locationSetting,
                                     cursor.getLong(COL_WEATHER_DATE));
 
                     Log.i(LOG_TAG, "Detail uri: " + detailUri);
-
-                    detailIntent.setData(detailUri);
-                    startActivity(detailIntent);
-
+                    //use the callback
+                    ((Callback)getActivity())
+                            .onItemSelected(detailUri);
                 }
             }
         });
