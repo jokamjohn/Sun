@@ -28,7 +28,7 @@ public class DetailActivity extends AppCompatActivity {
 
             //Attach the fragment dynamically
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.weather_detail_container,fragment)
+                    .add(R.id.weather_detail_container,fragment)
                     .commit();
         }
     }
