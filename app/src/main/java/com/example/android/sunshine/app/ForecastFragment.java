@@ -83,6 +83,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mForecastAdapter = new ForecastAdapter(getActivity(),null,0);
         //Binding the adapter to the view
         forecastListView.setAdapter(mForecastAdapter);
+
         //Adding a click listener to the list view
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

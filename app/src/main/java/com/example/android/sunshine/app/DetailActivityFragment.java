@@ -142,7 +142,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         Log.v(LOG_TAG, "in oncreate loader");
 
         Intent detailIntent = getActivity().getIntent();
-        if (detailIntent == null) {
+        if (detailIntent == null || detailIntent.getData() == null) {
             return null;
         }
         Uri detailUri = detailIntent.getData();

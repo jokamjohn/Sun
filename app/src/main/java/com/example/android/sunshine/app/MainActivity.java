@@ -14,18 +14,35 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String DETAIL_FRAGMENT_TAG = "DFAG";
 
     private String mLocation;
+    private Boolean mPaneUI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Current known location in the location setting
         mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (findViewById(R.id.weather_detail_container) != null)
+        {
+            mPaneUI = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, new DetailActivityFragment(),
+                                DETAIL_FRAGMENT_TAG)
+                        .commit();
+            }
+        }
+        else {
+
+            mPaneUI = false;
+        }
+
     }
 
     @Override
@@ -66,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         if (currentLocation != null && !currentLocation.equals(mLocation))
         {
             ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.fragment);
+                    .findFragmentById(R.id.fragment_forecast);
             if (null != forecastFragment)
             {
                 //Get new data for the new location
